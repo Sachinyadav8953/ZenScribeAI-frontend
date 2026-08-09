@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import axios from "axios";
 
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
+
 export async function POST(req: NextRequest) {
   try {
     const { email, password } = await req.json();
 
     // Call backend login
-    const loginRes = await axios.post("http://localhost:8000/auth/login", {
+    const loginRes = await axios.post(`${BACKEND_URL}/auth/login`, {
       email,
       password,
     });
@@ -14,7 +16,7 @@ export async function POST(req: NextRequest) {
     const { access_token, refresh_token } = loginRes.data;
 
     // Call backend /auth/me to get user details
-    const meRes = await axios.get("http://localhost:8000/auth/me", {
+    const meRes = await axios.get(`${BACKEND_URL}/auth/me`, {
       headers: {
         Authorization: `Bearer ${access_token}`,
       },

@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import axios from "axios";
 
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
+
 export async function GET(req: NextRequest) {
   const token = req.cookies.get("access_token")?.value;
   const refreshToken = req.cookies.get("refresh_token")?.value;
@@ -13,7 +15,7 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const res = await axios.get("http://localhost:8000/auth/me", {
+    const res = await axios.get(`${BACKEND_URL}/auth/me`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -24,7 +26,7 @@ export async function GET(req: NextRequest) {
     if (error.response?.status === 401 && refreshToken) {
       try {
         const refreshRes = await axios.post(
-          "http://localhost:8000/auth/refresh",
+          `${BACKEND_URL}/auth/refresh`,
           {
             refresh_token: refreshToken,
           }
@@ -34,7 +36,7 @@ export async function GET(req: NextRequest) {
         const newRefreshToken = refreshRes.data.refresh_token;
 
         // Retry the original profile request with the new access token
-        const retryRes = await axios.get("http://localhost:8000/auth/me", {
+        const retryRes = await axios.get(`${BACKEND_URL}/auth/me`, {
           headers: {
             Authorization: `Bearer ${newAccessToken}`,
           },
