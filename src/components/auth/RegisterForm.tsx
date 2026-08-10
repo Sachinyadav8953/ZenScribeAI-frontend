@@ -20,7 +20,7 @@ const registerSchema = zod
     email: zod.string().email("Please enter a valid email address"),
     password: zod.string().min(8, "Password must be at least 8 characters"),
     confirm_password: zod.string(),
-    role: zod.enum(["doctor", "admin"]),
+    role: zod.enum(["doctor"]),
     specialization: zod.string().optional(),
     license_number: zod.string().optional(),
     hospital_name: zod.string().optional(),
@@ -189,7 +189,6 @@ export function RegisterForm() {
           <Label htmlFor="role">Role</Label>
           <Select id="role" disabled={isLoading} {...register("role")}>
             <option value="doctor">Doctor</option>
-            <option value="admin">Admin</option>
           </Select>
         </div>
 

@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { useRouter } from "next/navigation";
 import { Navbar } from "@/components/shared/Navbar";
 import { Sidebar } from "@/components/shared/Sidebar";
 import { Loader } from "@/components/shared/Loader";
@@ -12,6 +13,7 @@ export default function ProtectedLayout({
   children: React.ReactNode;
 }) {
   const { fetchProfile, user } = useAuth();
+  const router = useRouter();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -20,19 +22,22 @@ export default function ProtectedLayout({
         await fetchProfile();
       } catch (err) {
         console.error("Profile load failed in protected layout:", err);
+        router.push("/login");
       } finally {
         setLoading(false);
       }
     }
     initUser();
-  }, [fetchProfile]);
+  }, [fetchProfile, router]);
 
   if (loading) {
     return <Loader fullPage message="Verifying session..." />;
   }
 
   if (!user) {
-    return null; // The middleware redirects to /login automatically
+    // Middleware handles redirect, but as a safety net push to login
+    router.push("/login");
+    return <Loader fullPage message="Redirecting..." />;
   }
 
   return (

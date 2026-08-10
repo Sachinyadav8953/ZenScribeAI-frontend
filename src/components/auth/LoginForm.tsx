@@ -59,8 +59,7 @@ export function LoginForm() {
     try {
       await login(values.email, values.password);
       toast.success("Successfully logged in!");
-      router.push("/dashboard");
-      router.refresh();
+      window.location.href = "/dashboard";
     } catch (err: any) {
       const errMsg = err.message || "";
       toast.error(errMsg || "Invalid credentials. Please try again.");
