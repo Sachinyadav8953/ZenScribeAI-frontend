@@ -47,7 +47,12 @@ export async function POST(req: NextRequest) {
   } catch (error: any) {
     console.error("Login API route error:", error.response?.data || error.message);
     const status = error.response?.status || 500;
-    const detail = error.response?.data?.detail || "Authentication failed";
+    const detail =
+      error.response?.data?.detail ||
+      (typeof error.response?.data === "string" ? error.response.data : null) ||
+      (error.code === "ECONNREFUSED" || error.code === "ENOTFOUND" || !error.response
+        ? `Backend server unreachable at ${BACKEND_URL}. Please ensure NEXT_PUBLIC_BACKEND_URL is set in Vercel project environment variables.`
+        : error.message || "Authentication failed");
     return NextResponse.json({ detail }, { status });
   }
 }
