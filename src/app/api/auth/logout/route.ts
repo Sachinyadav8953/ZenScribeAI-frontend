@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import axios from "axios";
-
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
+import { getBackendUrl } from "@/lib/config";
 
 export async function POST(req: NextRequest) {
+  const BACKEND_URL = getBackendUrl();
   const accessToken = req.cookies.get("access_token")?.value;
 
   try {

@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import axios from "axios";
-
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
+import { getBackendUrl } from "@/lib/config";
 
 export async function POST(req: NextRequest) {
+  const BACKEND_URL = getBackendUrl();
   try {
     const { license_number, password } = await req.json();
 
@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
       error.response?.data?.detail ||
       (typeof error.response?.data === "string" ? error.response.data : null) ||
       (error.code === "ECONNREFUSED" || error.code === "ENOTFOUND" || !error.response
-        ? `Backend server unreachable at ${BACKEND_URL}. Please ensure NEXT_PUBLIC_BACKEND_URL is set in Vercel project environment variables.`
+        ? `Backend server unreachable at ${BACKEND_URL}. Please ensure backend server is active.`
         : error.message || "Authentication failed");
     return NextResponse.json({ detail }, { status });
   }

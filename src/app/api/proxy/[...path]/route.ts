@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import axios from "axios";
-
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
+import { getBackendUrl } from "@/lib/config";
 
 export async function GET(
   req: NextRequest,
@@ -40,6 +39,7 @@ async function handleProxy(
   pathSegments: string[],
   method: string
 ) {
+  const BACKEND_URL = getBackendUrl();
   const path = pathSegments.join("/");
   const backendUrl = `${BACKEND_URL}/${path}`;
 

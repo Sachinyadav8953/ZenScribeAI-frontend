@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useConsultationStore } from "../stores/consultationStore";
 import { authService } from "../services/authService";
 import { Transcript } from "../types";
+import { getWsUrl } from "../lib/config";
 
 export function useAudioStream(consultationUuid: string) {
   const [isRecording, setIsRecording] = useState(false);
@@ -57,10 +58,7 @@ export function useAudioStream(consultationUuid: string) {
       const token = await authService.getWsToken();
 
       // 3. Establish WebSocket connection
-      let baseWs = process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:8000";
-      if (typeof window !== "undefined" && window.location.protocol === "https:" && baseWs.startsWith("ws://")) {
-        baseWs = baseWs.replace("ws://", "wss://");
-      }
+      const baseWs = getWsUrl();
       const wsUrl = `${baseWs}/audio/stream/${consultationUuid}?token=${token}`;
       const ws = new WebSocket(wsUrl);
       socketRef.current = ws;
