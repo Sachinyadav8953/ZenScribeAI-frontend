@@ -11,9 +11,10 @@ import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import Link from "next/link";
+import { AlertCircle } from "lucide-react";
 
 const loginSchema = zod.object({
-  email: zod.string().email("Please enter a valid email address"),
+  license_number: zod.string().min(5, "License number must be at least 5 characters"),
   password: zod.string().min(8, "Password must be at least 8 characters"),
 });
 
@@ -24,9 +25,7 @@ export function LoginForm() {
   const { toast } = useToast();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-  const [showVerifyResend, setShowVerifyResend] = useState(false);
-  const [userEmail, setUserEmail] = useState("");
-  const [isResending, setIsResending] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const {
     register,
@@ -36,42 +35,16 @@ export function LoginForm() {
     resolver: zodResolver(loginSchema),
   });
 
-  const handleResendVerification = async () => {
-    setIsResending(true);
-    try {
-      // Import dynamic service to avoid dependency loop
-      const { authService } = await import("@/services/authService");
-      await authService.resendVerification(userEmail);
-      toast.success("Verification link resent! Please check your inbox.");
-      setShowVerifyResend(false);
-    } catch (err: any) {
-      toast.error(
-        err.response?.data?.detail || "Failed to resend verification link. Please check your email address."
-      );
-    } finally {
-      setIsResending(false);
-    }
-  };
-
   const onSubmit = async (values: LoginFormValues) => {
     setIsLoading(true);
-    setShowVerifyResend(false);
+    setErrorMessage(null);
     try {
-      await login(values.email, values.password);
+      await login(values.license_number, values.password);
       toast.success("Successfully logged in!");
       window.location.href = "/dashboard";
     } catch (err: any) {
-      const errMsg = err.message || "";
-      toast.error(errMsg || "Invalid credentials. Please try again.");
-      
-      // If error message indicates email needs verification
-      if (
-        errMsg.toLowerCase().includes("verify") ||
-        errMsg.toLowerCase().includes("verification")
-      ) {
-        setShowVerifyResend(true);
-        setUserEmail(values.email);
-      }
+      const errMsg = err.message || "Invalid license number or password. Please check your credentials.";
+      setErrorMessage(errMsg);
     } finally {
       setIsLoading(false);
     }
@@ -79,31 +52,29 @@ export function LoginForm() {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      {errorMessage && (
+        <div className="p-3 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 rounded-lg text-xs font-semibold text-red-600 dark:text-red-400 flex items-center gap-2.5 shadow-sm">
+          <AlertCircle className="h-4 w-4 text-red-500 shrink-0" />
+          <span>{errorMessage}</span>
+        </div>
+      )}
       <div className="space-y-1.5">
-        <Label htmlFor="email">Email address</Label>
+        <Label htmlFor="license_number">Medical License Number</Label>
         <Input
-          id="email"
-          type="email"
-          placeholder="doctor@hospital.com"
-          error={!!errors.email}
+          id="license_number"
+          type="text"
+          placeholder="MCI-12345"
+          error={!!errors.license_number}
           disabled={isLoading}
-          {...register("email")}
+          {...register("license_number")}
         />
-        {errors.email && (
-          <p className="text-xs text-red-500 font-medium">{errors.email.message}</p>
+        {errors.license_number && (
+          <p className="text-xs text-red-500 font-medium">{errors.license_number.message}</p>
         )}
       </div>
 
       <div className="space-y-1.5">
-        <div className="flex items-center justify-between">
-          <Label htmlFor="password">Password</Label>
-          <Link
-            href="/forgot-password"
-            className="text-xs text-[#2563EB] hover:underline font-medium"
-          >
-            Forgot password?
-          </Link>
-        </div>
+        <Label htmlFor="password">Password</Label>
         <Input
           id="password"
           type="password"
@@ -117,22 +88,7 @@ export function LoginForm() {
         )}
       </div>
 
-      {showVerifyResend && (
-        <div className="p-3 bg-blue-50/50 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900/30 rounded-md text-xs text-[#0f172a] dark:text-slate-200 space-y-2">
-          <p className="font-semibold text-[#2563EB]">Email verification required</p>
-          <p className="text-slate-600 dark:text-slate-400 font-medium">
-            Please check your inbox. If you did not receive the link, click below to resend it.
-          </p>
-          <button
-            type="button"
-            disabled={isResending}
-            onClick={handleResendVerification}
-            className="text-xs text-[#2563EB] hover:underline font-bold disabled:opacity-50"
-          >
-            {isResending ? "Resending Link..." : "Resend Verification Link"}
-          </button>
-        </div>
-      )}
+      {/* Forgot password and email verification UI removed */}
 
       <Button type="submit" className="w-full" isLoading={isLoading}>
         Sign In

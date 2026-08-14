@@ -86,10 +86,10 @@ export default function ProfilePage() {
                 </div>
                 <div>
                   <Label className="text-[10px] uppercase font-bold text-slate-400">
-                    Email Address
+                    License Number
                   </Label>
                   <p className="text-sm text-slate-700 dark:text-slate-300 mt-1">
-                    {user.email}
+                    {user.license_number || "—"}
                   </p>
                 </div>
               </div>

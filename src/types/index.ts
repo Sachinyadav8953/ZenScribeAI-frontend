@@ -22,14 +22,14 @@ export interface User {
   id: number;
   uuid: string;
   full_name: string;
-  email: string;
+  // email: string;  // REMOVED — not exposed by backend
   role: UserRole;
   specialization?: Specialization;
   license_number?: string;
   license_verified: boolean;
   hospital_name?: string;
   phone_number?: string;
-  is_email_verified: boolean;
+  // is_email_verified: boolean;  // REMOVED — no longer relevant
   is_active: boolean;
   created_at: string;
 }

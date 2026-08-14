@@ -2,8 +2,8 @@ import { api } from "../lib/axios";
 import { User, TokenResponse } from "../types";
 
 export const authService = {
-  async login(email: string, password: string): Promise<{ user: User; token: string }> {
-    const res = await api.post("/api/auth/login", { email, password }, {
+  async login(license_number: string, password: string): Promise<{ user: User; token: string }> {
+    const res = await api.post("/api/auth/login", { license_number, password }, {
       // Don't route through API proxy since /api/auth/login is a local Next.js Route Handler
       baseURL: "", 
     });
@@ -30,8 +30,7 @@ export const authService = {
   },
 
   async forgotPassword(email: string): Promise<{ message: string }> {
-    const res = await api.post("/auth/forgot-password", { email });
-    return res.data;
+    return { message: "Email verification is disabled." };
   },
 
   async resetPassword(data: any): Promise<{ message: string }> {
@@ -39,10 +38,11 @@ export const authService = {
     return res.data;
   },
 
-  async resendVerification(email: string): Promise<{ message: string }> {
-    const res = await api.post("/auth/resend-verification", { email });
-    return res.data;
-  },
+  // resendVerification — COMMENTED OUT (email verification removed)
+  // async resendVerification(email: string): Promise<{ message: string }> {
+  //   const res = await api.post("/auth/resend-verification", { email });
+  //   return res.data;
+  // },
 
   async getWsToken(): Promise<string> {
     const res = await api.get("/api/auth/token", {

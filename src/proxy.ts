@@ -8,7 +8,6 @@ export function proxy(request: NextRequest) {
   const isAuthPage =
     pathname === "/login" ||
     pathname === "/register" ||
-    pathname === "/forgot-password" ||
     pathname === "/reset-password";
 
   const isProtectedRoute =
@@ -44,8 +43,6 @@ export const config = {
     "/profile/:path*",
     "/login",
     "/register",
-    "/forgot-password",
     "/reset-password",
-    "/verify-email",
   ],
 };

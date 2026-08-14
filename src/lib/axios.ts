@@ -14,10 +14,13 @@ export const api = axios.create({
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
-    // If we receive a 401 on the client side, redirect to login
+    // If we receive a 401 on the client side, redirect to login unless we are on login endpoint/page
     if (error.response?.status === 401 && !isServer) {
-      // Clear client state and redirect
-      if (typeof window !== "undefined") {
+      const requestUrl = error.config?.url || "";
+      const isLoginEndpoint = requestUrl.includes("/login") || requestUrl.includes("/auth/");
+      const isLoginPage = typeof window !== "undefined" && window.location.pathname === "/login";
+
+      if (!isLoginEndpoint && !isLoginPage && typeof window !== "undefined") {
         window.location.href = "/login";
       }
     }

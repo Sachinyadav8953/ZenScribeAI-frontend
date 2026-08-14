@@ -5,11 +5,11 @@ const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:800
 
 export async function POST(req: NextRequest) {
   try {
-    const { email, password } = await req.json();
+    const { license_number, password } = await req.json();
 
-    // Call backend login
+    // Call backend login with license_number
     const loginRes = await axios.post(`${BACKEND_URL}/auth/login`, {
-      email,
+      license_number,
       password,
     });
 

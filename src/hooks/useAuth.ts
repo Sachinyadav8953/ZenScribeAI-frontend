@@ -8,15 +8,15 @@ export function useAuth() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const login = useCallback(async (email: string, password: string) => {
+  const login = useCallback(async (license_number: string, password: string) => {
     setIsLoading(true);
     setError(null);
     try {
-      const data = await authService.login(email, password);
+      const data = await authService.login(license_number, password);
       setLogin(data.user, data.token);
       return data.user;
     } catch (err: any) {
-      const errMsg = err.response?.data?.detail || "Invalid email or password";
+      const errMsg = err.response?.data?.detail || "Invalid license number or password";
       setError(errMsg);
       throw new Error(errMsg);
     } finally {

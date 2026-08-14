@@ -13,16 +13,17 @@ import { Label } from "../ui/label";
 import { Select } from "../ui/select";
 import Link from "next/link";
 import { Specialization } from "../../types";
+import { AlertCircle } from "lucide-react";
 
 const registerSchema = zod
   .object({
     full_name: zod.string().min(2, "Full name must be at least 2 characters"),
-    email: zod.string().email("Please enter a valid email address"),
+    // email removed — authentication uses license_number
     password: zod.string().min(8, "Password must be at least 8 characters"),
     confirm_password: zod.string(),
     role: zod.enum(["doctor"]),
     specialization: zod.string().optional(),
-    license_number: zod.string().optional(),
+    license_number: zod.string().min(5, "License number must be at least 5 characters"),
     hospital_name: zod.string().optional(),
     phone_number: zod
       .string()
@@ -45,18 +46,6 @@ const registerSchema = zod
       message: "Specialization is required for doctors",
       path: ["specialization"],
     }
-  )
-  .refine(
-    (data) => {
-      if (data.role === "doctor" && (!data.license_number || data.license_number.length < 5)) {
-        return false;
-      }
-      return true;
-    },
-    {
-      message: "License number is required for doctors (min 5 characters)",
-      path: ["license_number"],
-    }
   );
 
 type RegisterFormValues = zod.infer<typeof registerSchema>;
@@ -78,6 +67,7 @@ export function RegisterForm() {
   const { toast } = useToast();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const {
     register,
@@ -95,16 +85,16 @@ export function RegisterForm() {
 
   const onSubmit = async (values: RegisterFormValues) => {
     setIsLoading(true);
+    setErrorMessage(null);
     try {
-      // Clean up fields depending on role before submission
       const submitData = {
         full_name: values.full_name,
-        email: values.email,
+        // email removed — not collected from user
         password: values.password,
         confirm_password: values.confirm_password,
         role: values.role,
         specialization: values.role === "doctor" ? values.specialization : undefined,
-        license_number: values.role === "doctor" ? values.license_number : undefined,
+        license_number: values.license_number,
         hospital_name: values.hospital_name || undefined,
         phone_number: values.phone_number || undefined,
       };
@@ -113,7 +103,12 @@ export function RegisterForm() {
       toast.success("Successfully registered! Please log in.");
       router.push("/login");
     } catch (err: any) {
-      toast.error(err.response?.data?.detail || "Registration failed. Please check details.");
+      const errMsg = err.response?.data?.detail || "Registration failed. Please check details.";
+      setErrorMessage(errMsg);
+      toast.error(errMsg, 5000);
+      setTimeout(() => {
+        setErrorMessage(null);
+      }, 5000);
     } finally {
       setIsLoading(false);
     }
@@ -121,6 +116,12 @@ export function RegisterForm() {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 max-h-[80vh] overflow-y-auto px-1 py-1">
+      {errorMessage && (
+        <div className="p-3 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 rounded-lg text-xs font-semibold text-red-600 dark:text-red-400 flex items-center gap-2.5 shadow-sm">
+          <AlertCircle className="h-4 w-4 text-red-500 shrink-0" />
+          <span>{errorMessage}</span>
+        </div>
+      )}
       <div className="space-y-1.5">
         <Label htmlFor="full_name">Full Name</Label>
         <Input
@@ -135,20 +136,7 @@ export function RegisterForm() {
         )}
       </div>
 
-      <div className="space-y-1.5">
-        <Label htmlFor="email">Email Address</Label>
-        <Input
-          id="email"
-          type="email"
-          placeholder="doctor@hospital.com"
-          error={!!errors.email}
-          disabled={isLoading}
-          {...register("email")}
-        />
-        {errors.email && (
-          <p className="text-xs text-red-500 font-medium">{errors.email.message}</p>
-        )}
-      </div>
+      {/* Email field removed — authentication uses license_number */}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-1.5">
@@ -217,23 +205,21 @@ export function RegisterForm() {
         )}
       </div>
 
-      {selectedRole === "doctor" && (
-        <div className="space-y-1.5">
-          <Label htmlFor="license_number">Medical License Number</Label>
-          <Input
-            id="license_number"
-            placeholder="MCI-12345"
-            error={!!errors.license_number}
-            disabled={isLoading}
-            {...register("license_number")}
-          />
-          {errors.license_number && (
-            <p className="text-xs text-red-500 font-medium">
-              {errors.license_number.message}
-            </p>
-          )}
-        </div>
-      )}
+      <div className="space-y-1.5">
+        <Label htmlFor="license_number">Medical License Number</Label>
+        <Input
+          id="license_number"
+          placeholder="MCI-12345"
+          error={!!errors.license_number}
+          disabled={isLoading}
+          {...register("license_number")}
+        />
+        {errors.license_number && (
+          <p className="text-xs text-red-500 font-medium">
+            {errors.license_number.message}
+          </p>
+        )}
+      </div>
 
       <div className="space-y-1.5">
         <Label htmlFor="hospital_name">Hospital / Clinic Name</Label>
