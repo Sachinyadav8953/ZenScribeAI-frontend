@@ -57,7 +57,11 @@ export function useAudioStream(consultationUuid: string) {
       const token = await authService.getWsToken();
 
       // 3. Establish WebSocket connection
-      const wsUrl = `${process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:8000"}/audio/stream/${consultationUuid}?token=${token}`;
+      let baseWs = process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:8000";
+      if (typeof window !== "undefined" && window.location.protocol === "https:" && baseWs.startsWith("ws://")) {
+        baseWs = baseWs.replace("ws://", "wss://");
+      }
+      const wsUrl = `${baseWs}/audio/stream/${consultationUuid}?token=${token}`;
       const ws = new WebSocket(wsUrl);
       socketRef.current = ws;
 
