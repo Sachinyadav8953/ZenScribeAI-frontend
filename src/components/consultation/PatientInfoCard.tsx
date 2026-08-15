@@ -74,13 +74,15 @@ export function PatientInfoCard({ consultation }: PatientInfoCardProps) {
           <h4 className="text-sm font-semibold text-[#0F172A]">Patient Details</h4>
         </div>
         {!isEditing ? (
-          <button
-            onClick={() => setIsEditing(true)}
-            className="inline-flex items-center gap-1 text-xs text-[#2563EB] hover:underline font-semibold"
-          >
-            <Edit2 className="h-3 w-3" />
-            Edit
-          </button>
+          consultation.status === "in_progress" && (
+            <button
+              onClick={() => setIsEditing(true)}
+              className="inline-flex items-center gap-1 text-xs text-[#2563EB] hover:underline font-semibold"
+            >
+              <Edit2 className="h-3 w-3" />
+              Edit
+            </button>
+          )
         ) : (
           <div className="flex gap-2">
             <button

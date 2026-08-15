@@ -262,14 +262,16 @@ export function ConsultationListTable({
                         </Link>
                       )}
 
-                      {/* EDIT BUTTON */}
-                      <button
-                        onClick={() => openEditModal(c)}
-                        className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                        title="Edit consultation details"
-                      >
-                        <Edit3 className="h-3.5 w-3.5" />
-                      </button>
+                      {/* EDIT BUTTON (Only for in_progress consultations) */}
+                      {c.status === "in_progress" && (
+                        <button
+                          onClick={() => openEditModal(c)}
+                          className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                          title="Edit consultation details"
+                        >
+                          <Edit3 className="h-3.5 w-3.5" />
+                        </button>
+                      )}
 
                       {/* DELETE BUTTON */}
                       <button
