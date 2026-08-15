@@ -42,14 +42,9 @@ export default function DashboardPage() {
     }
   };
 
-  const todayStr = new Date().toDateString();
-  const consultationsToday = consultations.filter(
-    (c) => new Date(c.started_at).toDateString() === todayStr
-  );
-
-  const totalToday = consultationsToday.length;
+  const totalCount = consultations.length;
   const inProgressCount = consultations.filter((c) => c.status === "in_progress").length;
-  const completedToday = consultationsToday.filter((c) => c.status === "completed").length;
+  const completedCount = consultations.filter((c) => c.status === "completed").length;
 
   return (
     <div className="space-y-8">
@@ -59,7 +54,7 @@ export default function DashboardPage() {
             Consultations Workspace
           </h2>
           <p className="text-sm text-slate-500 dark:text-slate-400 font-medium mt-1">
-            Review recent transcripts, update patient charts, and record live sessions.
+            Review completed & in-progress sessions, generate AI SOAP notes, and record live encounters.
           </p>
         </div>
         <Link href="/consultations/new">
@@ -75,10 +70,10 @@ export default function DashboardPage() {
           <CardContent className="p-6 flex items-center justify-between">
             <div className="space-y-1">
               <p className="text-[10px] uppercase font-bold tracking-wider text-slate-500">
-                Total Today
+                Total Consultations
               </p>
               <h3 className="text-3xl font-extrabold text-[#0F172A] dark:text-slate-100">
-                {totalToday}
+                {totalCount}
               </h3>
             </div>
             <div className="h-12 w-12 rounded-lg bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300 border border-slate-100 dark:border-slate-800">
@@ -107,10 +102,10 @@ export default function DashboardPage() {
           <CardContent className="p-6 flex items-center justify-between">
             <div className="space-y-1">
               <p className="text-[10px] uppercase font-bold tracking-wider text-slate-500">
-                Completed Today
+                Completed
               </p>
               <h3 className="text-3xl font-extrabold text-emerald-600">
-                {completedToday}
+                {completedCount}
               </h3>
             </div>
             <div className="h-12 w-12 rounded-lg bg-emerald-50 dark:bg-emerald-950/20 flex items-center justify-center text-emerald-600 border border-emerald-100/50 dark:border-emerald-900/30">
@@ -123,7 +118,7 @@ export default function DashboardPage() {
       <Card className="bg-white dark:bg-[#111827] overflow-hidden border border-slate-100 dark:border-slate-800">
         <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
           <h3 className="text-base font-bold text-[#0F172A] dark:text-slate-100">
-            Recent Consultations
+            All Consultations
           </h3>
           <button
             onClick={loadConsultations}

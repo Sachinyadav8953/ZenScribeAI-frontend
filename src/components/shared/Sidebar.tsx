@@ -16,6 +16,12 @@ export function Sidebar() {
       active: pathname === "/dashboard",
     },
     {
+      name: "Consultations",
+      href: "/consultations",
+      icon: FileText,
+      active: pathname === "/consultations",
+    },
+    {
       name: "New Consultation",
       href: "/consultations/new",
       icon: PlusCircle,
