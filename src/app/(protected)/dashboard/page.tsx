@@ -42,6 +42,12 @@ export default function DashboardPage() {
     }
   };
 
+  const handleUpdate = (updated: Consultation) => {
+    setConsultations((prev) =>
+      prev.map((c) => (c.uuid === updated.uuid ? updated : c))
+    );
+  };
+
   const totalCount = consultations.length;
   const inProgressCount = consultations.filter((c) => c.status === "in_progress").length;
   const completedCount = consultations.filter((c) => c.status === "completed").length;
@@ -132,6 +138,7 @@ export default function DashboardPage() {
             consultations={consultations}
             isLoading={loading}
             onDelete={handleDelete}
+            onUpdate={handleUpdate}
           />
         </CardContent>
       </Card>

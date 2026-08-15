@@ -42,6 +42,12 @@ export default function ConsultationsPage() {
     }
   };
 
+  const handleUpdate = (updated: Consultation) => {
+    setConsultations((prev) =>
+      prev.map((c) => (c.uuid === updated.uuid ? updated : c))
+    );
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -50,7 +56,7 @@ export default function ConsultationsPage() {
             Consultations
           </h2>
           <p className="text-sm text-slate-500 dark:text-slate-400 font-medium mt-1">
-            View, filter, and manage all your completed and active consultations.
+            View, edit, filter, and manage all your completed and active consultations.
           </p>
         </div>
         <Link href="/consultations/new">
@@ -78,6 +84,7 @@ export default function ConsultationsPage() {
             consultations={consultations}
             isLoading={loading}
             onDelete={handleDelete}
+            onUpdate={handleUpdate}
           />
         </CardContent>
       </Card>

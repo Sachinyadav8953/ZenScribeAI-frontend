@@ -2,22 +2,81 @@
 
 import React, { useState } from "react";
 import { Consultation } from "../../types";
-import { Trash2, ExternalLink, PlayCircle, Search } from "lucide-react";
+import { Trash2, ExternalLink, PlayCircle, Search, Edit3, X, Save } from "lucide-react";
 import Link from "next/link";
+import { consultationService } from "../../services/consultationService";
+import { useToast } from "../../stores/toastStore";
+import { Input } from "../ui/input";
+import { Select } from "../ui/select";
+import { Textarea } from "../ui/textarea";
 
 interface ConsultationListTableProps {
   consultations: Consultation[];
   isLoading: boolean;
   onDelete: (uuid: string) => void;
+  onUpdate?: (updated: Consultation) => void;
 }
 
 export function ConsultationListTable({
   consultations,
   isLoading,
   onDelete,
+  onUpdate,
 }: ConsultationListTableProps) {
+  const { toast } = useToast();
   const [filterStatus, setFilterStatus] = useState<"all" | "in_progress" | "completed">("all");
   const [searchQuery, setSearchQuery] = useState("");
+
+  // Edit Modal State
+  const [editingConsultation, setEditingConsultation] = useState<Consultation | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editAge, setEditAge] = useState("");
+  const [editGender, setEditGender] = useState("male");
+  const [editPhone, setEditPhone] = useState("");
+  const [editComplaint, setEditComplaint] = useState("");
+  const [isSavingEdit, setIsSavingEdit] = useState(false);
+
+  const openEditModal = (c: Consultation) => {
+    setEditingConsultation(c);
+    setEditName(c.patient_name);
+    setEditAge(c.patient_age?.toString() || "");
+    setEditGender(c.patient_gender || "male");
+    setEditPhone(c.patient_phone || "");
+    setEditComplaint(c.chief_complaint || "");
+  };
+
+  const closeEditModal = () => {
+    setEditingConsultation(null);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingConsultation) return;
+    if (!editName.trim()) {
+      toast.error("Patient name is required");
+      return;
+    }
+
+    setIsSavingEdit(true);
+    try {
+      const updated = await consultationService.update(editingConsultation.uuid, {
+        patient_name: editName,
+        patient_age: editAge ? Number(editAge) : undefined,
+        patient_gender: editGender,
+        patient_phone: editPhone || undefined,
+        chief_complaint: editComplaint || undefined,
+      });
+
+      toast.success("Consultation updated successfully!");
+      if (onUpdate) {
+        onUpdate(updated);
+      }
+      closeEditModal();
+    } catch (err: any) {
+      toast.error(err.response?.data?.detail || "Failed to update consultation details.");
+    } finally {
+      setIsSavingEdit(false);
+    }
+  };
 
   const formatDate = (dateStr: string) => {
     try {
@@ -182,7 +241,7 @@ export function ConsultationListTable({
                   <td className="py-3.5 px-4">{getStatusBadge(c.status)}</td>
                   <td className="py-3.5 px-4 text-xs text-slate-500 dark:text-slate-400">{formatDate(c.started_at)}</td>
                   <td className="py-3.5 px-4 text-right">
-                    <div className="flex items-center justify-end gap-2">
+                    <div className="flex items-center justify-end gap-1.5">
                       {c.status === "in_progress" ? (
                         <Link
                           href={`/consultations/${c.uuid}/room`}
@@ -202,6 +261,17 @@ export function ConsultationListTable({
                           View
                         </Link>
                       )}
+
+                      {/* EDIT BUTTON */}
+                      <button
+                        onClick={() => openEditModal(c)}
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                        title="Edit consultation details"
+                      >
+                        <Edit3 className="h-3.5 w-3.5" />
+                      </button>
+
+                      {/* DELETE BUTTON */}
                       <button
                         onClick={() => {
                           if (confirm("Are you sure you want to delete this consultation?")) {
@@ -219,6 +289,111 @@ export function ConsultationListTable({
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {/* EDIT CONSULTATION MODAL */}
+      {editingConsultation && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-lg rounded-xl bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 p-6 shadow-xl space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+              <h3 className="text-base font-bold text-[#0F172A] dark:text-slate-100 flex items-center gap-2">
+                <Edit3 className="h-4 w-4 text-blue-600" />
+                Edit Consultation
+              </h3>
+              <button
+                onClick={closeEditModal}
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">
+                  Patient Full Name <span className="text-red-500">*</span>
+                </label>
+                <Input
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  placeholder="Patient Name"
+                  className="mt-1 text-xs"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">
+                    Age
+                  </label>
+                  <Input
+                    type="number"
+                    value={editAge}
+                    onChange={(e) => setEditAge(e.target.value)}
+                    placeholder="e.g. 35"
+                    className="mt-1 text-xs"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">
+                    Gender
+                  </label>
+                  <Select
+                    value={editGender}
+                    onChange={(e) => setEditGender(e.target.value)}
+                    className="mt-1 text-xs py-0"
+                  >
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                    <option value="other">Other</option>
+                  </Select>
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">
+                  Phone Number
+                </label>
+                <Input
+                  value={editPhone}
+                  onChange={(e) => setEditPhone(e.target.value)}
+                  placeholder="e.g. +91 9876543210"
+                  className="mt-1 text-xs"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">
+                  Chief Complaint
+                </label>
+                <Textarea
+                  value={editComplaint}
+                  onChange={(e) => setEditComplaint(e.target.value)}
+                  placeholder="Describe primary symptoms..."
+                  className="mt-1 text-xs min-h-[80px]"
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+              <button
+                onClick={closeEditModal}
+                disabled={isSavingEdit}
+                className="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSaveEdit}
+                disabled={isSavingEdit}
+                className="flex items-center gap-1.5 px-4 py-2 text-xs font-semibold bg-[#2563EB] text-white hover:bg-blue-700 rounded-md transition-colors disabled:opacity-50"
+              >
+                <Save className="h-3.5 w-3.5" />
+                {isSavingEdit ? "Saving..." : "Save Changes"}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
