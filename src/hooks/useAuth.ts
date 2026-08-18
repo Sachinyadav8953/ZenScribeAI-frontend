@@ -53,6 +53,9 @@ export function useAuth() {
       }
       return currentUser;
     } catch (err: any) {
+      try {
+        await authService.logout();
+      } catch {}
       setLogout();
       throw err;
     } finally {
